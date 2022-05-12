@@ -1,0 +1,445 @@
+﻿@model CombinedViewModel
+@inject ICustomDataProtector protector
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
+
+@{
+    ViewData["Title"] = "Hotel List";
+
+    var returnUrl = ViewBag.LoginRequired;
+    var loggedUser = httpContextAccessor.HttpContext.Session.Get<User>("User");
+    if (loggedUser == null) loggedUser = new User();
+    var isAdmin = (ViewBag.Admin != null && ViewBag.Admin == true);
+    var filters = Model.UserFilters;
+    var selectedCheckInDate = Model.UserFilters.checkIn.ToShortDateString();
+    var selectedCheckOutDate = Model.UserFilters.checkOut.ToShortDateString();
+}
+    <section>
+        <div class="row">
+            <div class="col-md-3 filter-wrapper card-shadow">
+                <form id="form-filter">
+                    <div class="form-group tm-form-element tm-form-element-100">
+                        <i class="fa fa-map-marker fa-2x tm-form-element-icon"></i>
+                        <input asp-for="@Model.UserFilters.location" class="form-control" placeholder="Type your destination..."
+                            value="" style="padding-left: 45px;">
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-field">
+                                <div class="form-group tm-form-element tm-form-element-50">
+                                    <i class="fa fa-calendar fa-2x tm-form-element-icon"></i>
+                                    <input asp-for="@Model.UserFilters.checkIn"class="form-control date-input"
+                                            placeholder="Check In" id="inputCheckIn">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-field">
+                                <div class="form-group tm-form-element tm-form-element-50">
+                                    <i class="fa fa-calendar fa-2x tm-form-element-icon"></i>
+                                    <input asp-for="@Model.UserFilters.checkOut" class="form-control date-input"
+                                            placeholder="Check Out" id="inputCheckOut">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="form-field">
+                                    <input asp-for="@Model.UserFilters.adults" class="form-control" min="1" placeholder="How many adults?">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <div class="form-field">
+                                    <input asp-for="@Model.UserFilters.children" class="form-control" min="0" placeholder="How many children?">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <hr>
+
+                <div class="row justify-content-between align-items-center filter-header">
+                    <div class="col-sm-6">
+                        <h4 class="fw-700">Filters</h4>
+                    </div>
+                    <div class="col-sm-6 text-right">
+                        <button type="button" class="btn btn-link fc-red p-0" id="clearFilters" style="text-decoration: none; cursor: pointer;">Clear All</button>
+                    </div>
+                </div>
+                    <div class="rating-filter">
+                        <h5 class="fw-700">Hotel Ratings</h5>
+                        <div class="form-check fc-red">
+                            <input asp-for="@Model.UserFilters.fivestar" class="form-check-input" type="checkbox">
+                            <label class="form-check-label w-100" asp-for="@Model.UserFilters.fivestar">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="text-right fs-16">
+                                            5 Stars
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="form-check fc-red">
+                            <input asp-for="@Model.UserFilters.fourstar" class="form-check-input" type="checkbox">
+                            <label class="form-check-label w-100" asp-for="@Model.UserFilters.fourstar">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="text-right fs-16">
+                                            4 Stars
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="form-check fc-red">
+                            <input asp-for="@Model.UserFilters.threestar" class="form-check-input" type="checkbox">
+                            <label class="form-check-label w-100" asp-for="@Model.UserFilters.threestar">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="text-right fs-16">
+                                            3 Stars
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="form-check fc-red">
+                            <input asp-for="@Model.UserFilters.twostar" class="form-check-input" type="checkbox">
+                            <label class="form-check-label w-100" asp-for="@Model.UserFilters.twostar">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="text-right fs-16">
+                                            2 Stars
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="form-check fc-red">
+                            <input asp-for="@Model.UserFilters.onestar" class="form-check-input" type="checkbox">
+                            <label class="form-check-label w-100" asp-for="@Model.UserFilters.onestar">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <i class="fa fa-star white" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="text-right fs-16">
+                                            1 Star
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="rating-filter">
+                        <h5 class="fw-700">Price (per night)</h5>
+                        <div class="form-check">
+                            <input asp-for="@Model.UserFilters.price1" class="form-check-input" type="checkbox">
+                            <label class="form-check-label w-100 fw-100" asp-for="@Model.UserFilters.price1">
+                                ₹1500 or less
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <input asp-for="@Model.UserFilters.price2" class="form-check-input" type="checkbox">
+                            <label class="form-check-label w-100 fw-100" asp-for="@Model.UserFilters.price2">
+                                ₹1501 - ₹2500
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <input asp-for="@Model.UserFilters.price3" class="form-check-input" type="checkbox">
+                            <label class="form-check-label w-100 fw-100" asp-for="@Model.UserFilters.price3">
+                                ₹2501 - ₹3500
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <input asp-for="@Model.UserFilters.price4" class="form-check-input" type="checkbox">
+                            <label class="form-check-label w-100 fw-100" asp-for="@Model.UserFilters.price4">
+                                ₹3501 - ₹4500
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <input asp-for="@Model.UserFilters.price5" class="form-check-input" type="checkbox">
+                            <label class="form-check-label w-100 fw-100" asp-for="@Model.UserFilters.price5">
+                                ₹4501 or more
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <button type="submit" class="btn btn-success text-white mt-3" style="cursor: pointer;">Search</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-md-9 p-5">
+                <div class="hotel-wrapper">
+
+                @for(int i=0;i<Model.hotels.Count;i++)
+                {
+                    <div class="row mb-5 card-shadow">
+                        <div class="col-md-3">
+                            <img src="~/@Model.hotels[i].ImgSrc" alt="Hotel Image">
+                        </div>
+                        <div class="col-md-9">
+                            <form asp-action="HotelDetails" asp-controller="Home" asp-route-id="@Model.hotels[i].HotelId">
+                                <input asp-for="@Model.UserFilters.location" class="form-control" type="hidden">
+                                <input asp-for="@Model.UserFilters.checkIn" class="form-control date-input" type="hidden" id="inputCheckIn">
+                                <input asp-for="@Model.UserFilters.checkOut" class="form-control date-input" type="hidden" id="inputCheckOut">
+                                <input asp-for="@Model.UserFilters.adults" class="form-control" min="1" type="hidden">
+                                <input asp-for="@Model.UserFilters.children" class="form-control" min="0" type="hidden">
+
+                                <div class="hotel-description">
+                                    <h3 class="fw-700">@Model.hotels[i].HotelName</h3>
+                                    <p class="fs-18">@Model.hotels[i].Address, @Model.hotels[i].AreaName, @Model.hotels[i].City</p>
+                                    <div class="review-user-wrapper d-flex align-items-center">
+                                        <div class="review-rating">
+                                            <span>@Model.hotels[i].HotelRating</span>
+                                            <span><i class="fa fa-star white" aria-hidden="true"></i></span>
+                                        </div>
+                                        <span class="ml-2">(545 reviews) &#183; Very Good</span>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-end price-wrapper">
+                                        <div class="col-sm-6">
+                                            <span class="fc-red fw-700 effective-price">₹@Model.hotels[i].Price</span>
+                                            <span class="actual-price">
+                                                <s>₹@Model.hotels[i].ActualPrice</s>
+                                                <span class="text-warning"> @Model.hotels[i].Discount% off</span>
+                                            </span>
+                                        </div>
+                                        <div class="col-sm-6 text-right">
+                                            <button class="read_more btn btn-link rm-text-decoration" type="submit">View Details</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                }
+                    
+                    @*
+
+                    <div class="row mb-5 card-shadow">
+                        <div class="col-md-3">
+                            <img src="~/img/temp1.jpg" alt="Hotel Image">
+                        </div>
+                        <div class="col-md-9">
+                            <div class="hotel-description">
+                                <h3 class="fw-700">Hotel Sunset</h3>
+                                <p class="fs-18">SH62, Currency Exchange, opp. Kailash Talkies,Taj Ganj, Agra</p>
+                                <div class="review-user-wrapper d-flex align-items-center">
+                                    <div class="review-rating">
+                                        <span>5</span>
+                                        <span><i class="fa fa-star white" aria-hidden="true"></i></span>
+                                    </div>
+                                    <span class="ml-2">(545 reviews) &#183; Very Good</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-end price-wrapper">
+                                    <div class="col-sm-6">
+                                        <span class="fc-red fw-700 effective-price">₹900</span>
+                                        <span class="actual-price">
+                                            <s>₹1500</s>
+                                            <span class="text-warning"> 40% off</span>
+                                        </span>
+                                    </div>
+                                    <div class="col-sm-6 text-right">
+                                        <a href="./HotelDetails.html" class="read_more">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-5 card-shadow">
+                        <div class="col-md-3">
+                            <img src="~/img/temp1.jpg" alt="Hotel Image">
+                        </div>
+                        <div class="col-md-9">
+                            <div class="hotel-description">
+                                <h3 class="fw-700">Hotel Sunset</h3>
+                                <p class="fs-18">SH62, Currency Exchange, opp. Kailash Talkies,Taj Ganj, Agra</p>
+                                <div class="review-user-wrapper d-flex align-items-center">
+                                    <div class="review-rating">
+                                        <span>5</span>
+                                        <span><i class="fa fa-star white" aria-hidden="true"></i></span>
+                                    </div>
+                                    <span class="ml-2">(545 reviews) &#183; Very Good</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-end price-wrapper">
+                                    <div class="col-sm-6">
+                                        <span class="fc-red fw-700 effective-price">₹900</span>
+                                        <span class="actual-price">
+                                            <s>₹1500</s>
+                                            <span class="text-warning"> 40% off</span>
+                                        </span>
+                                    </div>
+                                    <div class="col-sm-6 text-right">
+                                        <a href="./HotelDetails.html" class="read_more">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-5 card-shadow">
+                        <div class="col-md-3">
+                            <img src="~/img/temp1.jpg" alt="Hotel Image">
+                        </div>
+                        <div class="col-md-9">
+                            <div class="hotel-description">
+                                <h3 class="fw-700">Hotel Sunset</h3>
+                                <p class="fs-18">SH62, Currency Exchange, opp. Kailash Talkies,Taj Ganj, Agra</p>
+                                <div class="review-user-wrapper d-flex align-items-center">
+                                    <div class="review-rating">
+                                        <span>5</span>
+                                        <span><i class="fa fa-star white" aria-hidden="true"></i></span>
+                                    </div>
+                                    <span class="ml-2">(545 reviews) &#183; Very Good</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-end price-wrapper">
+                                    <div class="col-sm-6">
+                                        <span class="fc-red fw-700 effective-price">₹900</span>
+                                        <span class="actual-price">
+                                            <s>₹1500</s>
+                                            <span class="text-warning"> 40% off</span>
+                                        </span>
+                                    </div>
+                                    <div class="col-sm-6 text-right">
+                                        <a href="./HotelDetails.html" class="read_more">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-5 card-shadow">
+                        <div class="col-md-3">
+                            <img src="~/img/temp1.jpg" alt="Hotel Image">
+                        </div>
+                        <div class="col-md-9">
+                            <div class="hotel-description">
+                                <h3 class="fw-700">Hotel Sunset</h3>
+                                <p class="fs-18">SH62, Currency Exchange, opp. Kailash Talkies,Taj Ganj, Agra</p>
+                                <div class="review-user-wrapper d-flex align-items-center">
+                                    <div class="review-rating">
+                                        <span>5</span>
+                                        <span><i class="fa fa-star white" aria-hidden="true"></i></span>
+                                    </div>
+                                    <span class="ml-2">(545 reviews) &#183; Very Good</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-end price-wrapper">
+                                    <div class="col-sm-6">
+                                        <span class="fc-red fw-700 effective-price">₹900</span>
+                                        <span class="actual-price">
+                                            <s>₹1500</s>
+                                            <span class="text-warning"> 40% off</span>
+                                        </span>
+                                    </div>
+                                    <div class="col-sm-6 text-right">
+                                        <a href="./HotelDetails.html" class="read_more">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-5 card-shadow">
+                        <div class="col-md-3">
+                            <img src="~/img/temp1.jpg" alt="Hotel Image">
+                        </div>
+                        <div class="col-md-9">
+                            <div class="hotel-description">
+                                <h3 class="fw-700">Hotel Sunset</h3>
+                                <p class="fs-18">SH62, Currency Exchange, opp. Kailash Talkies,Taj Ganj, Agra</p>
+                                <div class="review-user-wrapper d-flex align-items-center">
+                                    <div class="review-rating">
+                                        <span>5</span>
+                                        <span><i class="fa fa-star white" aria-hidden="true"></i></span>
+                                    </div>
+                                    <span class="ml-2">(545 reviews) &#183; Very Good</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-end price-wrapper">
+                                    <div class="col-sm-6">
+                                        <span class="fc-red fw-700 effective-price">₹900</span>
+                                        <span class="actual-price">
+                                            <s>₹1500</s>
+                                            <span class="text-warning"> 40% off</span>
+                                        </span>
+                                    </div>
+                                    <div class="col-sm-6 text-right">
+                                        <a href="./HotelDetails.html" class="read_more">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    *@
+                </div>
+            </div>
+        </div>
+    </section>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#clearFilters').on('click', function() {
+                $('.form-check-input').prop('checked', false);
+            });
+            let strCheckIn = '@selectedCheckInDate';
+            let strCheckOut = '@selectedCheckOutDate';
+            var checkInParts = strCheckIn.split('/');
+            var checkOutParts = strCheckOut.split('/');
+            var checkInDate = new Date(parseInt(checkInParts[2]), parseInt(checkInParts[0]-1), parseInt(checkInParts[1]));
+            var checkOutDate = new Date(parseInt(checkOutParts[2]), parseInt(checkOutParts[0]-1), parseInt(checkOutParts[1]));
+
+            pickerCheckIn.setDate(checkInDate, true);
+            pickerCheckOut.setDate(checkOutDate, true);
+            @*$('#inputCheckIn)').setDate('@selectedCheckInDate');
+            $('#@Html.IdFor(m=>m.UserFilters.checkOut)').text('@selectedCheckOutDate');*@
+        });
+    </script>
+}

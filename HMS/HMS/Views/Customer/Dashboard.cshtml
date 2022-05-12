@@ -1,0 +1,314 @@
+﻿@model CombinedViewModel
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
+
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = null;
+    var loggedUser = httpContextAccessor.HttpContext.Session.Get<User>("User");
+    if (loggedUser == null) loggedUser = new User();
+    var fullName = loggedUser.FirstName + " " + loggedUser.LastName;
+    var allBookings = Model.bookingHistoryHelper;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - HMS</title>
+  <link rel="stylesheet" href="~/css/bootstrap.min.css"> <!-- Bootstrap style -->
+  <link rel="stylesheet" href="~/font-awesome-4.7.0/css/font-awesome.min.css"> <!-- Font Awesome -->
+  <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+  <link rel="stylesheet" href="~/css/dashboard.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+  <link rel="stylesheet" href="~/css/customstyle.css" type="text/css" />
+</head>
+
+<body>
+  <nav>
+    <div class="sidebar-top" style="margin-bottom: 50px;">
+      <span class="shrink-btn">
+        <i class='bx bx-chevron-left'></i>
+      </span>
+      <a asp-action="index" asp-controller="home" class="rm-text-decoration d-flex align-items-center">
+        <i class="fa fa-h-square fs-18 text-white" aria-hidden="true" style="margin-left: 14px; font-size: 40px;"></i>
+        <h3 class="hide mb-0" style="padding-left: 18px; font-size: 26px;">HMS</h3>
+      </a>
+    </div>
+
+    <div class="sidebar-links">
+      <ul>
+        <li class="tooltip-element" data-tooltip="0">
+          <a href="#" class="active" data-active="0">
+            <div class="icon">
+              <i class='bx bx-tachometer'></i>
+              <i class='bx bxs-tachometer'></i>
+            </div>
+            <span class="link hide">Dashboard</span>
+          </a>
+        </li>
+        <li class="tooltip-element" data-tooltip="1">
+          <a asp-action="BookingHistory" asp-controller="customer" data-active="1">
+            <div class="icon">
+              <i class='bx bx-history'></i>
+              <i class='bx bx-history'></i>
+            </div>
+            <span class="link hide">Booking History</span>
+          </a>
+        </li>
+        <li class="tooltip-element" data-tooltip="2">
+          <a asp-action="FavoriteHotels" asp-controller="customer" data-active="2">
+            <div class="icon">
+              <i class='bx bx-heart'></i>
+              <i class='bx bxs-heart'></i>
+            </div>
+            <span class="link hide">Favorite Hotels</span>
+          </a>
+        </li>
+        <div class="tooltip">
+          <span class="show">Dashboard</span>
+          <span>Booking History</span>
+          <span>Favorite Hotels</span>
+        </div>
+      </ul>
+
+      <h4 class="hide">Shortcuts</h4>
+
+      <ul>
+        <li class="tooltip-element" data-tooltip="0">
+          <a asp-action="contact" asp-controller="home" data-active="4">
+            <div class="icon">
+              <i class='bx bxs-contact'></i>
+              <i class='bx bxs-contact'></i>
+            </div>
+            <span class="link hide">Contact Us</span>
+          </a>
+        </li>
+        <li class="tooltip-element" data-tooltip="1">
+          <a asp-action="faq" asp-controller="home" data-active="5">
+            <div class="icon">
+              <i class='bx bx-help-circle'></i>
+              <i class='bx bxs-help-circle'></i>
+            </div>
+            <span class="link hide">FAQs</span>
+          </a>
+        </li>
+        <li class="tooltip-element" data-tooltip="2">
+          <a href="#" data-active="6">
+            <div class="icon">
+              <i class='bx bx-cog'></i>
+              <i class='bx bxs-cog'></i>
+            </div>
+            <span class="link hide">Settings</span>
+          </a>
+        </li>
+        <div class="tooltip">
+          <span class="show">Contact Us</span>
+          <span>FAQs</span>
+          <span>Settings</span>
+        </div>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="#" class="account tooltip-element" data-tooltip="0" style="text-decoration: none;">
+        <i class='bx bx-user'></i>
+      </a>
+      <div class="admin-user tooltip-element" data-tooltip="1">
+        <div class="admin-profile hide">
+          <div class="admin-info">
+            <h3>@fullName</h3>
+            <h5>Customer</h5>
+          </div>
+        </div>
+        <a asp-action="logout" asp-controller="home" class="log-out">
+          <i class='bx bx-log-out'></i>
+        </a>
+      </div>
+      <div class="tooltip">
+        <span class="show">@fullName</span>
+        <span>Logout</span>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <h1 class="fw-700">Dashboard</h1>
+    <table id="table_id" class="display" style=" z-index: 0; position: relative;">
+        <thead>
+            <tr>
+                <th>Reservation ID</th>
+                <th>Hotel Name</th>
+                <th>Hotel Address</th>
+                <th>Details</th>
+                <th>Duration</th>
+                <th>Price</th>
+                <th>Operations</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for(int i=0;i<Model.bookingHistory.Count;i++) 
+            {
+                var isCheckInMode = Model.bookingHistory[i].CheckIn <= DateTime.Now;
+                <tr>
+                    <td>@Model.bookingHistory[i].BookingId</td>
+                    <td>@Model.bookingHistory[i].hotel.HotelName</td>
+                    <td>@Model.bookingHistory[i].hotel.Address, @Model.bookingHistory[i].hotel.AreaName, @Model.bookingHistory[i].hotel.City</td>
+                    <td>
+                        @Model.bookingHistory[i].TotalNights Night X @Model.bookingHistory[i].TotalGuests Guests
+                    </td>
+
+                    <td>
+                        @Model.bookingHistory[i].CheckIn.ToString("dd'/'MM'/'yyyy") to @Model.bookingHistory[i].CheckOut.ToString("dd'/'MM'/'yyyy")
+                    </td>
+
+                    <td>₹@Model.bookingHistory[i].TotalAmount</td>
+
+                    <td>
+                            @if(!isCheckInMode)
+                            {
+                                <button type="button" class="btn btn-danger d-flex align-items-center justify-content-center" id="cancel_@i">
+                                    <i class='bx bx-window-close'></i> <span style="font-size: 14px; padding-left: 5px;">Cancel</span>
+                                </button>
+                            } else
+                            {
+                                <button type="button" class="btn btn-danger d-flex align-items-center justify-content-center disabled">
+                                    <i class='bx bx-window-close'></i> <span style="font-size: 14px; padding-left: 5px;">Cancel</span>
+                                </button>
+                            }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p class="copyright mb-0">
+      &copy; 2022 - <span>HMS</span> All Rights Reserved.
+    </p>
+  </main>
+
+  <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title fw-700">Cancel Reservation</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <input type="hidden" id="currentCancelId" />
+            <input type="hidden" asp-for="@Model.cancel.BookingId" />
+            <div class="modal-body">
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label class="label" asp-for="@Model.cancel.Reason">Reason</label>
+                        <textarea class="form-control mb-4" asp-for="@Model.cancel.Reason" maxlength="500" rows="2"></textarea>
+                        <span asp-validation-for="@Model.cancel.Reason" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary submitBtn">Cancel</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+<div class="toast right-bottom" data-autohide="false" id="statusToast">
+    <div class="toast-header justify-content-between">
+        <div id="successToast">
+            <svg class=" rounded mr-2" width="20" height="20" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img">
+                <rect fill="#28A745" width="100%" height="100%" />
+            </svg>
+            <strong class="mr-auto text-success">Success</strong>
+        </div>
+        <div id="errorToast">
+            <svg class=" rounded mr-2" width="20" height="20" xmlns="http:www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img">
+                <rect fill="#DC3545" width="100%" height="100%" />    
+            </svg>
+            <strong class="mr-auto text-danger">Error</strong>
+        </div>
+        
+        <button type="button" class="close ml-5" data-dismiss="toast" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="toast-body" id="toastMsg">
+        Hello, world! This is a toast message.
+    </div>
+</div>
+
+  <script src="~/js/dashboard.js"></script>
+  <script src="~/js/jquery-1.11.3.min.js"></script>
+  <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+  <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+  <script src="~/js/popper.min.js"></script>
+  <script src="~/js/bootstrap.min.js"></script>
+  <script src="~/js/datepicker.min.js"></script>
+
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+  <script>
+      $(document).ready( function () {
+         function ShowToast(msg, isSuccess) {
+            $("#statusToast").toast('show');
+            $('#toastMsg').text(msg);
+            if (isSuccess === 'true') {
+                $('#successToast').removeClass('d-none').addClass('d-block');
+                $('#errorToast').removeClass('d-block').addClass('d-none');
+            } else {
+                $('#errorToast').removeClass('d-none').addClass('d-block');
+                $('#successToast').removeClass('d-block').addClass('d-none');
+            }
+            setTimeout(function () {
+                $("#statusToast").toast('hide');
+            }, 4000);
+        }
+
+         $('#table_id').DataTable();
+         let allBookingsObj = JSON.parse('@Html.Raw(Json.Serialize(allBookings))');
+
+         $('button[id^="cancel_"]').on('click', function(e) {
+            e.preventDefault();
+            let id = parseInt($(this)[0].id.split('_').pop());
+            $('#@Html.IdFor(m => m.cancel.BookingId)').val(allBookingsObj[id].bookingId);
+            $('#currentCancelId').val(id);
+            $('#cancelModal').modal("show");
+            e.stopPropagation();
+        });
+
+        $('#cancelModal .submitBtn').on('click', function() {
+            let id = parseInt($('#currentCancelId').val());
+
+            var model = {
+                BookingId: $('#@Html.IdFor(m=>m.cancel.BookingId)').val(),
+                Reason: $('#@Html.IdFor(m => m.cancel.Reason)').val(),
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("CancelBooking", "Customer")',
+                dataType: "json",
+                data: model,
+                cache:false,
+                success: function(res) {
+                    if(res.Status==false) {
+                        ShowToast(res.Msg, "false");
+                    } else {
+                        window.location.reload(true);
+                    }
+                },
+                error: function(e) {
+                    ShowToast(JSON.stringify(e), "false");
+                },
+                complete: function(e) {
+                    $('#cancelModal').modal("hide");
+                }
+            });
+        });
+      });
+  </script>
+</body>
+
+</html>

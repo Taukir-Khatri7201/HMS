@@ -1,0 +1,241 @@
+﻿@model CombinedViewModel
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
+
+@{
+    ViewData["Title"] = "Favorite Hotels";
+    Layout = null;
+    var loggedUser = httpContextAccessor.HttpContext.Session.Get<User>("User");
+    if (loggedUser == null) loggedUser = new User();
+    var fullName = loggedUser.FirstName + " " + loggedUser.LastName;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favorite Hotels - HMS</title>
+  <link rel="stylesheet" href="~/css/bootstrap.min.css"> <!-- Bootstrap style -->
+  <link rel="stylesheet" href="~/font-awesome-4.7.0/css/font-awesome.min.css"> <!-- Font Awesome -->
+  <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+  <link rel="stylesheet" href="~/css/dashboard.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+  
+</head>
+
+<body>
+  <nav>
+    <div class="sidebar-top" style="margin-bottom: 50px;">
+      <span class="shrink-btn">
+        <i class='bx bx-chevron-left'></i>
+      </span>
+      <a asp-action="index" asp-controller="home" class="rm-text-decoration d-flex align-items-center">
+        <i class="fa fa-h-square fs-18" aria-hidden="true" style="margin-left: 14px; font-size: 40px;"></i>
+        <h3 class="hide mb-0" style="padding-left: 18px; font-size: 26px;">HMS</h3>
+      </a>
+    </div>
+
+    <div class="sidebar-links">
+      <ul>
+        <li class="tooltip-element" data-tooltip="0">
+          <a asp-action="Dashboard" asp-controller="customer" data-active="0">
+            <div class="icon">
+              <i class='bx bx-tachometer'></i>
+              <i class='bx bxs-tachometer'></i>
+            </div>
+            <span class="link hide">Dashboard</span>
+          </a>
+        </li>
+        <li class="tooltip-element" data-tooltip="1">
+          <a asp-action="BookingHistory" asp-controller="customer" data-active="1">
+            <div class="icon">
+              <i class='bx bx-history'></i>
+              <i class='bx bxs-history'></i>
+            </div>
+            <span class="link hide">Booking History</span>
+          </a>
+        </li>
+        <li class="tooltip-element" data-tooltip="2">
+          <a asp-action="FavoriteHotels" asp-controller="customer" data-active="2" class="active">
+            <div class="icon">
+              <i class='bx bx-heart'></i>
+              <i class='bx bxs-heart'></i>
+            </div>
+            <span class="link hide">Favorite Hotels</span>
+          </a>
+        </li>
+        <div class="tooltip">
+          <span class="show">Dashboard</span>
+          <span>Booking History</span>
+          <span>Favorite Hotels</span>
+        </div>
+      </ul>
+
+      <h4 class="hide">Shortcuts</h4>
+
+      <ul>
+        <li class="tooltip-element" data-tooltip="0">
+          <a asp-action="contact" asp-controller="home" data-active="4">
+            <div class="icon">
+              <i class='bx bxs-contact'></i>
+              <i class='bx bxs-contact'></i>
+            </div>
+            <span class="link hide">Contact Us</span>
+          </a>
+        </li>
+        <li class="tooltip-element" data-tooltip="1">
+          <a asp-action="faq" asp-controller="home" data-active="5">
+            <div class="icon">
+              <i class='bx bx-help-circle'></i>
+              <i class='bx bxs-help-circle'></i>
+            </div>
+            <span class="link hide">FAQs</span>
+          </a>
+        </li>
+        <li class="tooltip-element" data-tooltip="2">
+          <a href="#" data-active="6">
+            <div class="icon">
+              <i class='bx bx-cog'></i>
+              <i class='bx bxs-cog'></i>
+            </div>
+            <span class="link hide">Settings</span>
+          </a>
+        </li>
+        <div class="tooltip">
+          <span class="show">Contact Us</span>
+          <span>FAQs</span>
+          <span>Settings</span>
+        </div>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="#" class="account tooltip-element" data-tooltip="0" style="text-decoration: none;">
+        <i class='bx bx-user'></i>
+      </a>
+      <div class="admin-user tooltip-element" data-tooltip="1">
+        <div class="admin-profile hide">
+          <div class="admin-info">
+            <h3>@fullName</h3>
+            <h5>Customer</h5>
+          </div>
+        </div>
+        <a asp-action="logout" asp-controller="home" class="log-out">
+          <i class='bx bx-log-out'></i>
+        </a>
+      </div>
+      <div class="tooltip">
+        <span class="show">@fullName</span>
+        <span>Logout</span>
+      </div>
+    </div>
+  </nav>
+
+
+  <main>
+    <h1 class="fw-700">Favorite Hotels</h1>
+    <table id="table_id" class="display" style=" z-index: 0; position: relative;">
+        <thead>
+            <tr>
+                <th>Hotel Name</th>
+                <th>Hotel Address</th>
+                <th>Details</th>
+                <th>Operations</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for(int i=0;i<Model.hotels.Count;i++) 
+            {
+                <tr>
+                    <td>@Model.hotels[i].HotelName</td>
+                    <td>@Model.hotels[i].Address, @Model.hotels[i].AreaName, @Model.hotels[i].City</td>
+                    <td>
+                        <a class="btn btn-danger rm-text-decoration curpo" asp-action="HotelDetails" asp-controller="home" asp-route-id="@Model.hotels[i].HotelId">
+                            <i class='bx bx-detail'></i> View Details
+                        </a>
+                    </td>
+
+                    <td>
+                        <a class="btn btn-danger rm-text-decoration curpo" asp-action="RemoveFromFavorite" asp-controller="customer" asp-route-id="@Model.hotels[i].HotelId">
+                            <i class='bx bx-window-close'></i> Remove
+                        </a>
+                    </td>
+                </tr>
+            }
+
+            @*<tr>
+                <td>Hotel Sunset</td>
+                <td>SH62, Currency Exchange, opp. Kailash Talkies, Taj Ganj, Agra</td>
+                <td>
+                    <button type="button" class="btn btn-danger">
+                        <i class='bx bx-detail'></i> View Details
+                    </button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger">
+                        <i class='bx bx-window-close'></i> Remove
+                    </button>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Hotel Sunset</td>
+                <td>SH62, Currency Exchange, opp. Kailash Talkies, Taj Ganj, Agra</td>
+                <td>
+                    <button type="button" class="btn btn-danger">
+                        <i class='bx bx-detail'></i> View Details
+                    </button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger">
+                        <i class='bx bx-window-close'></i> Remove
+                    </button>
+                </td>
+            </tr>
+            
+            <tr>
+                <td>Hotel Sunset</td>
+                <td>SH62, Currency Exchange, opp. Kailash Talkies, Taj Ganj, Agra</td>
+                <td>
+                    <button type="button" class="btn btn-danger">
+                        <i class='bx bx-detail'></i> View Details
+                    </button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger">
+                        <i class='bx bx-window-close'></i> Remove
+                    </button>
+                </td>
+            </tr>
+
+            <tr>
+                <td>964</td>
+                <td>Hotel Pioneer</td>
+                <td>SH62, Currency Exchange, opp. Kailash Talkies, Taj Ganj, Ahmedabad</td>
+                <td>3 Nights X 3 Guests</td>
+                <td>12/04/22 to 15/04/22</td>
+            </tr>*@
+        </tbody>
+    </table>
+    <p class="copyright mb-0">
+      &copy; 2022 - <span>HMS</span> All Rights Reserved.
+    </p>
+  </main>
+
+  <script src="~/js/dashboard.js"></script>
+  <script src="~/js/jquery-1.11.3.min.js"></script>
+  <script src="~/js/popper.min.js"></script>
+  <script src="~/js/bootstrap.min.js"></script>
+  <script src="~/js/datepicker.min.js"></script>
+
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+  <script>
+      $(document).ready( function () {
+         $('#table_id').DataTable();
+      } );
+  </script>
+</body>
+
+</html>

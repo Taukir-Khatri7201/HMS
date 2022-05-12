@@ -1,0 +1,354 @@
+﻿@model CombinedViewModel
+@inject ICustomDataProtector protector
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
+
+@{
+    ViewData["Title"] = "Hotel Management System";
+
+    var returnUrl = ViewBag.LoginRequired;
+    var userCreds = Context.Request.Cookies["UserCredentials"];
+    var deserializedUserCreds = new LoginViewModel();
+    if(userCreds != null) {
+        deserializedUserCreds = JsonSerializer.Deserialize<LoginViewModel>(userCreds);
+        deserializedUserCreds.Password = protector.Decrypt(deserializedUserCreds.Password);
+        var temp = userCreds;
+    }
+    var loggedUser = httpContextAccessor.HttpContext.Session.Get<User>("User");
+    if (loggedUser == null) loggedUser = new User();
+    var isAdmin = (ViewBag.Admin != null && ViewBag.Admin == true);
+}
+
+<div class="tm-main-content" id="top">
+    <div class="tm-section tm-bg-img" id="tm-section-1">
+        <div class="tm-bg-white ie-container-width-fix-2">
+            <div class="container ie-h-align-center-fix">
+                <div class="row">
+                    <div class="col-xs-12 ml-auto mr-auto ie-container-width-fix">
+                        <form asp-action="HotelList" asp-controller="Home" method="get" class="tm-search-form tm-section-pad-2">
+                            <div class="form-row tm-search-form-row">
+                                <div class="form-group tm-form-element tm-form-element-100">
+                                    <i class="fa fa-map-marker fa-2x tm-form-element-icon"></i>
+                                    <input asp-for="@Model.UserFilters.location" class="form-control" placeholder="Type your destination...">
+                                </div>
+                                <div class="form-group tm-form-element tm-form-element-50">
+                                    <i class="fa fa-calendar fa-2x tm-form-element-icon"></i>
+                                    <input autocomplete="off" asp-for="@Model.UserFilters.checkIn" class="form-control" placeholder="Check In" id="inputCheckIn">
+                                </div>
+                                <div class="form-group tm-form-element tm-form-element-50">
+                                    <i class="fa fa-calendar fa-2x tm-form-element-icon"></i>
+                                    <input autocomplete="off" asp-for="@Model.UserFilters.checkOut" class="form-control" placeholder="Check Out" id="inputCheckOut">
+                                </div>
+                            </div>
+                            <div class="form-row tm-search-form-row">
+                                <div class="form-group tm-form-element tm-form-element-2">
+                                    <select asp-for="@Model.UserFilters.adults" class="form-control tm-select">
+                                        <option value="0">Adult</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10+</option>
+                                    </select>
+                                    <i class="fa fa-2x fa-user tm-form-element-icon"></i>
+                                </div>
+                                <div class="form-group tm-form-element tm-form-element-2">
+                                    <select asp-for="@Model.UserFilters.children" class="form-control tm-select">
+                                        <option value="0">Children</option>
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10+</option>
+                                    </select>
+                                    <i class="fa fa-user tm-form-element-icon tm-form-element-icon-small"></i>
+                                </div>
+                                <div class="form-group tm-form-element tm-form-element-2">
+                                    <select asp-for="@Model.UserFilters.typeOfRoom" class="form-control">
+                                        <option disabled selected>Select a Room</option>
+                                        <optgroup label="AC">
+                                            <option value="1">Single</option>
+                                            <option value="2">Double</option>
+                                            <option value="3">Triple</option>
+                                        </optgroup>
+
+                                        <optgroup label="Non-AC">
+                                            <option value="4">Single</option>
+                                            <option value="5">Double</option>
+                                            <option value="6">Triple</option>
+                                            <option value="7">King</option>
+                                            <option value="8">Queen</option>
+                                        </optgroup>
+                                    </select>
+                                    <i class="fa fa-2x fa-bed tm-form-element-icon"></i>
+                                </div>
+                                <div class="form-group tm-form-element tm-form-element-2">
+                                    <button type="submit" class="btn btn-primary tm-btn-search ptb-10">
+                                        Check Availability
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-row clearfix pl-2 pr-2 tm-fx-col-xs">
+                                <p class="tm-margin-b-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                </p>
+                                <a asp-action="faq" asp-controller="Home"
+                                    class="ie-10-ml-auto ml-auto mt-1 tm-font-semibold tm-color-primary">Need
+                                    Help?</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tm-section tm-position-relative">
+        <div class="choose">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="choose_box">
+                            <div class="titlepage">
+                                <h2><span class="text_norlam">Choose The Perfect</span> <br>Accommodation</h2>
+                            </div>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+                                irure dolor in reprehenderit in voluptate velit </p>
+                            <a class="read_more" href="#">See More</a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="img_box">
+                                    <figure><img src="img/img1.jpg" alt="#" /></figure>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="img_box">
+                                    <figure><img src="img/img2.jpg" alt="#" /></figure>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="img_box">
+                                    <figure><img src="img/img3.jpg" alt="#" /></figure>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tm-section tm-section-pad tm-bg-gray" id="tm-section-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-8 col-xl-8">
+                    <div class="tm-article-carousel">
+                        <article class="tm-bg-white mr-2 tm-carousel-item">
+                            <img src="img/img-01.jpg" alt="Image" class="img-fluid">
+                            <div class="tm-article-pad">
+                                <header>
+                                    <h3 class="text-uppercase tm-article-title-2">Nunc in felis aliquet metus luctus
+                                        iaculis</h3>
+                                </header>
+                                <p>Aliquam ac lacus volutpat, dictum risus at, scelerisque nulla. Nullam
+                                    sollicitudin at augue venenatis eleifend. Nulla ligula ligula, egestas sit amet
+                                    viverra id, iaculis sit amet ligula.</p>
+                                <a href="#" class="text-uppercase btn-primary tm-btn-primary">Get More Info.</a>
+                            </div>
+                        </article>
+                        <article class="tm-bg-white mr-2 tm-carousel-item">
+                            <img src="img/img-02.jpg" alt="Image" class="img-fluid">
+                            <div class="tm-article-pad">
+                                <header>
+                                    <h3 class="text-uppercase tm-article-title-2">Sed cursus dictum nunc quis
+                                        molestie</h3>
+                                </header>
+                                <p>Pellentesque quis dui sit amet purus scelerisque eleifend sed ut eros. Morbi
+                                    viverra blandit massa in varius. Sed nec ex eu ex tincidunt iaculis. Curabitur
+                                    eget turpis gravida.</p>
+                                <a href="#" class="text-uppercase btn-primary tm-btn-primary">View Detail</a>
+                            </div>
+                        </article>
+                        <article class="tm-bg-white mr-2 tm-carousel-item">
+                            <img src="img/img-01.jpg" alt="Image" class="img-fluid">
+                            <div class="tm-article-pad">
+                                <header>
+                                    <h3 class="text-uppercase tm-article-title-2">Eget diam pellentesque interdum ut
+                                        porta</h3>
+                                </header>
+                                <p>Aenean finibus tempor nulla, et maximus nibh dapibus ac. Duis consequat sed
+                                    sapien venenatis consequat. Aliquam ac lacus volutpat, dictum risus at,
+                                    scelerisque nulla.</p>
+                                <a href="#" class="text-uppercase btn-primary tm-btn-primary">More Info.</a>
+                            </div>
+                        </article>
+                        <article class="tm-bg-white mr-2 tm-carousel-item">
+                            <img src="img/img-02.jpg" alt="Image" class="img-fluid">
+                            <div class="tm-article-pad">
+                                <header>
+                                    <h3 class="text-uppercase tm-article-title-2">Lorem ipsum dolor sit amet,
+                                        consectetur</h3>
+                                </header>
+                                <p>Suspendisse molestie sed dui eget faucibus. Duis accumsan sagittis tortor in
+                                    ultrices. Praesent tortor ante, fringilla ac nibh porttitor, fermentum commodo
+                                    nulla.</p>
+                                <a href="#" class="text-uppercase btn-primary tm-btn-primary">Detail Info.</a>
+                            </div>
+                        </article>
+                        <article class="tm-bg-white mr-2 tm-carousel-item">
+                            <img src="img/img-01.jpg" alt="Image" class="img-fluid">
+                            <div class="tm-article-pad">
+                                <header>
+                                    <h3 class="text-uppercase tm-article-title-2">Orci varius natoque penatibus et
+                                    </h3>
+                                </header>
+                                <p>Pellentesque quis dui sit amet purus scelerisque eleifend sed ut eros. Morbi
+                                    viverra blandit massa in varius. Sed nec ex eu ex tincidunt iaculis. Curabitur
+                                    eget turpis gravida.</p>
+                                <a href="#" class="text-uppercase btn-primary tm-btn-primary">Read More</a>
+                            </div>
+                        </article>
+                        <article class="tm-bg-white tm-carousel-item">
+                            <img src="img/img-02.jpg" alt="Image" class="img-fluid">
+                            <div class="tm-article-pad">
+                                <header>
+                                    <h3 class="text-uppercase tm-article-title-2">Nullam sollicitudin at augue
+                                        venenatis eleifend</h3>
+                                </header>
+                                <p>Aenean finibus tempor nulla, et maximus nibh dapibus ac. Duis consequat sed
+                                    sapien venenatis consequat. Aliquam ac lacus volutpat, dictum risus at,
+                                    scelerisque nulla.</p>
+                                <a href="#" class="text-uppercase btn-primary tm-btn-primary">More Details</a>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <div class="col-sm-12 col-md-12 col-lg-4 col-xl-4 tm-recommended-container">
+                    <div class="tm-bg-white card-shadow">
+                        <div class="tm-bg-primary tm-sidebar-pad">
+                            <h3 class="tm-color-white tm-sidebar-title">Recommended Places</h3>
+                            <p class="tm-color-white tm-margin-b-0 tm-font-light">Enamel pin cliche tilde, kitsch
+                                and VHS thundercats</p>
+                        </div>
+                        <div class="tm-sidebar-pad-2">
+                            <a href="#" class="media tm-media tm-recommended-item">
+                                <img src="img/tn-img-01.jpg" alt="Image">
+                                <div class="media-body tm-media-body tm-bg-gray">
+                                    <h4 class="text-uppercase tm-font-semibold tm-sidebar-item-title">Europe</h4>
+                                </div>
+                            </a>
+                            <a href="#" class="media tm-media tm-recommended-item">
+                                <img src="img/tn-img-02.jpg" alt="Image">
+                                <div class="media-body tm-media-body tm-bg-gray">
+                                    <h4 class="text-uppercase tm-font-semibold tm-sidebar-item-title">Asia</h4>
+                                </div>
+                            </a>
+                            <a href="#" class="media tm-media tm-recommended-item">
+                                <img src="img/tn-img-03.jpg" alt="Image">
+                                <div class="media-body tm-media-body tm-bg-gray">
+                                    <h4 class="text-uppercase tm-font-semibold tm-sidebar-item-title">Africa</h4>
+                                </div>
+                            </a>
+                            <a href="#" class="media tm-media tm-recommended-item">
+                                <img src="img/tn-img-04.jpg" alt="Image">
+                                <div class="media-body tm-media-body tm-bg-gray">
+                                    <h4 class="text-uppercase tm-font-semibold tm-sidebar-item-title">South America
+                                    </h4>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="testimonial">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="titlepage">
+                        <h2 class="text-center mb-4"><b>Testimonial</b></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6 margin_boot">
+                        <div class="test_box card-shadow">
+                            <h4>Mark Jhonson</h4>
+                            <i><img src="img/te1.png" alt="#" /></i>
+                            <p>There are many variations of passages of Lorem Ipsum available, but the majority have
+                                suffered
+                                alteration in some form, by injected humour,</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="test_box card-shadow">
+                            <h4>Mac Du</h4>
+                            <i><img src="img/te1.png" alt="#" /></i>
+                            <p>There are many variations of passages of Lorem Ipsum available, but the majority have
+                                suffered
+                                alteration in some form, by injected humour,</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tm-section-2">
+        <div class="container">
+            <div class="row">
+                <div class="col text-center">
+                    <h2 class="tm-section-title">We are here to help you</h2>
+                    <p class="tm-color-white tm-section-subtitle">Subscribe to get our newsletters</p>
+                    <form class=" tm-search-form tm-section-pad-2">
+                        <div class="justify-content-center form-row">
+                            <div class="col-9">
+                                <div class="row justify-content-center">
+                                    <div class="col-sm-8 form-group tm-form-element tm-form-element-100">
+                                        <i class="fa fa-2x fa-user tm-form-element-icon"></i>
+                                        <input name="email" type="email" class="form-control" id="inputCity"
+                                            placeholder="Type your Email Address">
+                                    </div>
+
+                                    <div class="col-sm-4 form-group tm-form-element tm-form-element-100">
+                                        <a href="#" class="tm-color-white tm-btn-white-bordered">Subscribe
+                                            Newletters</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="tm-bg-dark-blue">
+        <div class="container">
+            <div class="row">
+                <p class="col-sm-12 text-center tm-font-light tm-color-white p-4 tm-margin-b-0">
+                    Copyright &copy; <span class="tm-current-year">2022</span> HMS</p>
+            </div>
+        </div>
+    </footer>
+</div>
